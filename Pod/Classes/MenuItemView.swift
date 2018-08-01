@@ -11,6 +11,7 @@ import UIKit
 open class MenuItemView: UIView {
     lazy public var titleLabel: UILabel = self.initLabel()
     lazy public var descriptionLabel: UILabel = self.initLabel()
+    lazy public var batchLabel: UILabel = self.initLabel()
     lazy public var menuImageView: UIImageView = {
         $0.isUserInteractionEnabled = true
         $0.translatesAutoresizingMaskIntoConstraints = false
@@ -30,14 +31,19 @@ open class MenuItemView: UIView {
             } else {
                 backgroundColor = isSelected ? menuOptions.selectedBackgroundColor : menuOptions.backgroundColor
             }
+
             
             switch menuItemOptions.displayMode {
-            case .text(let title):
+            case .text(let title, _):
                 updateLabel(titleLabel, text: title)
                 
                 // adjust label width if needed
                 let labelSize = calculateLabelSize(titleLabel, maxWidth: maxWindowSize)
                 widthConstraint.constant = labelSize.width
+
+                if isSelected {batchLabel.removeFromSuperview()}
+
+
             case let .multilineText(title, description):
                 updateLabel(titleLabel, text: title)
                 updateLabel(descriptionLabel, text: description)
@@ -78,9 +84,12 @@ open class MenuItemView: UIView {
         self.menuItemOptions = menuItemOptions
         
         switch menuItemOptions.displayMode {
-        case .text(let title):
+        case .text(let title,let batchCount):
             commonInit({
                 self.setupTitleLabel(title)
+                if let batchCount = batchCount{
+                    if batchCount > 0 {self.setupBatch(batchLabel, batchCount: batchCount)}
+                }
                 self.layoutLabel()
             })
         case let .multilineText(title, description):
@@ -93,7 +102,7 @@ open class MenuItemView: UIView {
                 self.setupImageView(image)
                 self.layoutImageView()
             })
-        case .custom(let view):
+        case .custom(let view, _):
             commonInit({
                 self.setupCustomView(view)
                 self.layoutCustomView()
@@ -164,6 +173,24 @@ open class MenuItemView: UIView {
         label.text = text.text
         updateLabel(label, text: text)
         addSubview(label)
+    }
+
+    fileprivate func setupBatch(_ label: UILabel, batchCount: Int) {
+
+        batchLabel.backgroundColor = UIColor.orange
+        batchLabel.textColor = UIColor.white
+
+
+        label.text = String(batchCount)
+        addSubview(label)
+        NSLayoutConstraint.activate([
+            NSLayoutConstraint(item: label, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1.0, constant: 0),
+            NSLayoutConstraint(item: label, attribute: .trailing, relatedBy: .equal, toItem: self, attribute: .trailing, multiplier: 1.0, constant: 0),
+            NSLayoutConstraint(item: label, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .width, multiplier: 1.0, constant: 15),
+            NSLayoutConstraint(item: label, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .height, multiplier: 1.0, constant: 15)
+            ])
+        batchLabel.layer.cornerRadius = 15 / 2
+        batchLabel.clipsToBounds = true
     }
     
     fileprivate func updateLabel(_ label: UILabel, text: MenuItemText) {

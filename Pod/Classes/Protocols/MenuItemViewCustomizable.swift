@@ -19,15 +19,15 @@ public extension MenuItemViewCustomizable {
     }
     var displayMode: MenuItemDisplayMode {
         let title = MenuItemText()
-        return .text(title: title)
+        return .text(title: title,batchCount: 0)
     }
 }
 
 public enum MenuItemDisplayMode {
-    case text(title: MenuItemText)
+    case text(title: MenuItemText,batchCount:Int?)
     case multilineText(title: MenuItemText, description: MenuItemText)
     case image(image: UIImage, selectedImage: UIImage?)
-    case custom(view: UIView)
+    case custom(view: UIView,selectedView:UIView?)
 }
 
 public struct MenuItemText {
